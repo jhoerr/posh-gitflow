@@ -1,4 +1,17 @@
-﻿Function Configure-GitFlow
+﻿<# 
+.SYNOPSIS 
+    Adds PowerShell GitFlow extensions to GitHub for Windows
+.DESCRIPTION
+    This script adds support for PowerShell GitFlow to GitHub for Windows. The GitFlow scripts were developed
+    by nvie (https://github.com/nvie/gitflow). This script is itself a modified version of a script developed 
+    by Howard van Rooijen and documented in a fantastic series of blog posts about using GitHub with TeamCity: 
+    http://blogs.endjin.com/2013/03/a-step-by-step-guide-to-using-gitflow-with-teamcity-part-1-different-branching-models/
+.NOTES 
+    Author     : John Hoerr - jhoerr@gmail.com
+.LINK 
+    http://github.com/jhoerr/posh-gitflow
+#> 
+Function Configure-GitFlow
 {	
 	$currentPath = Split-Path ${function:Configure-GitFlow}.File -Parent
 
@@ -27,4 +40,3 @@
 }
 
 Configure-GitFlow
-
