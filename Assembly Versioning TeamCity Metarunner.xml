@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="Set Assembly Version from Git">
+  <description>Set the version of all assemblies to the value of the Git tag (for master builds) or branch name (for Release/Hotfix builds.)</description>
+  <settings>
+    <parameters>
+      <param name="autoinc.path" value="%autoinc.path%" spec="text description='Path to a file containing per-configuration, per-branch build counters. Will be created if it does not exist. If you use a build agent, this path must be reachable by the agent.' display='normal' label='Build Counter Data File Path' validationMode='not_empty'" />
+    </parameters>
+    <build-runners>
+      <runner name="Set Assembly Version from Git Release/Tag" type="jetbrains_powershell">
+        <parameters>
+          <param name="jetbrains_powershell_bitness" value="x86" />
+          <param name="jetbrains_powershell_execution" value="PS1" />
+          <param name="jetbrains_powershell_script_code"><![CDATA[function Update-SourceVersion($ver, $fileVer, $infoVer)
+{
+    $newVer = "AssemblyVersion(""$ver"")"
+    $newFileVer = "AssemblyFileVersion(""$fileVer"")"
+    $newInfoVer = "AssemblyInformationalVersion(""$infoVer"")"
+
+  foreach ($o in $input) 
+  {
+    Write-output $o.FullName
+    $TmpFile = $o.FullName + ".tmp"
+
+     get-content $o.FullName | 
+        %{$_ -replace 'AssemblyVersion\("[0-9]+(\.([0-9]+|\*)){1,3}"\)', $newVer } |
+        %{$_ -replace 'AssemblyFileVersion\("[0-9]+(\.([0-9]+|\*)){1,3}"\)', $newFileVer } |
+        %{$_ -replace 'AssemblyInformationalVersion\("[0-9]+(\.([0-9]+|\*)){1,3}"\)', $newInfoVer } > $TmpFile
+
+     move-item $TmpFile $o.FullName -force
+  }
+}
+
+function GetNextIncrement($buildId, $release)
+{
+    $ht = @{}
+    $increment = 0;
+    $key = $buildId+$release;
+    
+    $autoincPath = "%autoinc.path%"
+    Write-Host "Using versions file at $autoincPath"
+
+    # if the autoinc file exists, deserialize the data into a hashtable.
+    if(Test-Path -Path $autoincPath)
+    {
+        $json = Get-Content $autoincPath | ConvertFrom-Json
+        $json.psobject.properties | Foreach { $ht[$_.Name] = $_.Value }
+    }
+    
+    # if there is an existing increment for this $key, then fetch it.
+    if ($ht.ContainsKey($key))
+    {
+        $increment = $ht.Get_Item($key)
+        Write-Host "Last increment of $key is $increment"
+    }
+
+    # increment the increment.
+    $increment = 1 + $increment;
+    Write-Host "New increment of $key is $increment"
+
+    # if the autoinc file exists, persist the hashtable back to disk.
+    if(Test-Path -Path $autoincPath)
+    {
+      # update the hashtable...
+      $ht.Set_Item($key, $increment);
+      # ...and write it to disk.   
+      ConvertTo-Json $ht -Compress | Set-Content $autoincPath 
+    }
+
+    return $increment;
+}
+
+$version = "%build.number%"
+$branch = "%teamcity.build.branch%"
+
+$beta = 0;
+$suffix = "";
+
+
+if ($branch -match "[\d]+.[\d]+(.[\d]+)?" -or $branch -match "master")
+{ 
+    ### master
+    if ($branch -match "master")
+    {
+        $version = git describe --abbrev=0
+        $patchBase = 200;
+    }
+    ### release / hotfix
+    else
+    {
+        $version = $branch
+        $patchBase = 100;
+        $beta = GetNextIncrement "%system.teamcity.buildType.id%" "$branch"
+        $suffix = "-beta$beta"
+    }
+
+    $version = $version.Trim().TrimStart("v");
+    $parts = $version.Split(".")
+    $major = $parts[0]
+    $minor = $parts[1]
+    $patch = @{$true=$parts[2];$false=0}[$parts.Length -eq 3] 
+    $patchFull = $patchBase + 10*$patch + $beta
+
+    $fileVersion = "$major.$minor.$patchFull"
+    $infoVersion = "$major.$minor.$patch$suffix"
+}
+### develop / feature branch
+else
+{
+    $fileVersion = $version;
+    $infoVersion = $version
+}
+
+Write-Host "Updating versions to $version / $fileVersion / $infoVersion..."
+Write-Host "##teamcity[buildNumber '$infoVersion']"
+
+foreach ($file in "AssemblyInfo.cs", "AssemblyInfo.vb" ) 
+{
+  get-childitem -recurse |? {$_.Name -eq $file} | Update-SourceVersion $version $fileVersion $infoVersion;
+}
+
+Write-Host "Done"]]></param>
+          <param name="jetbrains_powershell_script_mode" value="CODE" />
+          <param name="teamcity.step.mode" value="default" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <requirements />
+  </settings>
+</meta-runner>
