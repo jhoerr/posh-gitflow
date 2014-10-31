@@ -346,7 +346,7 @@ cmd_finish() {
 	fi
 	if flag push; then
 		echo "- '$DEVELOP_BRANCH', '$MASTER_BRANCH' and tags have been pushed to '$ORIGIN'"
-		echo "- Release branch '$BRANCH' in '$ORIGIN' has been deleted."
+		echo "- Hotfix branch '$BRANCH' in '$ORIGIN' has been deleted."
 	fi
 	echo
 }
