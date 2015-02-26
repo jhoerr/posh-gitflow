@@ -9,8 +9,8 @@ This script adds support for PowerShell GitFlow to GitHub for Windows. The GitFl
 
 **Installation**
 
-1. Run `./Configure-GitFlow.ps1`
-2. In the GitHub for Windows client, browse to a repository and 'Open in Git Shell'
+1. In the GitHub for Windows client, browse to a repository and 'Open in Git Shell'
+2. Run `git clone https://github.com/jhoerr/posh-gitflow.git;cd post-gitflow;./Configure-GitFlow.ps1;cd ..`
 3. Run `git flow init` to initialize the repository for GitFlow.
 4. Review the <a href="https://github.com/jhoerr/posh-gitflow/raw/master/One-Page%20GitFlow-Cheatsheet.pdf">One-Page GitFlow Cheatsheet</a> to learn the commands.
 
