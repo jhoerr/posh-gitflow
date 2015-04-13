@@ -9,13 +9,13 @@ This script adds GitFlow support to [posh-git](https://github.com/dahlbyk/posh-g
 
 **Installation**
 
-1. Open a posh-git shell. (If using the GitHub for Windows client browse to a repository and 'Open in Git Shell'.)
+1. Open a posh-git shell. (If using the GitHub for Windows client browse to a repository and 'Open in Git Shell'. Be sure to change to an appropriate directory so you don't clone into an existing repository.)
 2. Run `git clone https://github.com/jhoerr/posh-gitflow.git;cd posh-gitflow;./Configure-GitFlow.ps1;cd ..`
 3. Run `git flow init` to initialize the repository for GitFlow.
 4. Review the <a href="https://github.com/jhoerr/posh-gitflow/raw/master/One-Page%20GitFlow-Cheatsheet.pdf">One-Page GitFlow Cheatsheet</a> to learn the commands.
 
 **Known Issues**
-Depending on your computer's PoweerShell execution policy, you may receive the following error during installation step #1:
+Depending on your computer's PowerShell execution policy, you may receive the following error during installation step #1:
 ```
 .\Configure-GitFlow.ps1 : File Configure-GitFlow.ps1 cannot be loaded. The file Configure-GitFlow.ps1 is
 not digitally signed. You cannot run this script on the current system. For more information about running
