@@ -1,7 +1,7 @@
 posh-gitflow
 ============
 
-Adds PowerShell extensions to [posh-git](https://github.com/dahlbyk/posh-git) (the GitHub for Windows shell) to enable GitFlow source code management
+Adds PowerShell extensions to [posh-git](https://github.com/dahlbyk/posh-git) to enable GitFlow source code management. Posh-git is a PowerShell environment for git that can be installed by itself, or bundled with GitHub for Windows as the 'Git Shell.'
 
 **Description**
 
