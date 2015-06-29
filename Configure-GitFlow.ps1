@@ -12,16 +12,56 @@
     http://github.com/jhoerr/posh-gitflow
 #> 
 Function Configure-GitFlow
-{	
-	$currentPath = Split-Path ${function:Configure-GitFlow}.File -Parent
+{
+    Param([string]$customGitPath = "")
 
-	# Find all 'PortableGit*' folders in the GitHub for Windows application folder
-	$gitHubPath = "C:\Users\$env:username\AppData\Local\GitHub"
-	$portableGitFolders = Get-ChildItem $gitHubPath | ?{ $_.PSIsContainer } | ?{$_.Name -like 'PortableGit*'}
+    $currentPath = Split-Path ${function:Configure-GitFlow}.File -Parent
+ 
+    if ($customGitPath -eq "") 
+    {
+        Write-Host "No custom git path supplied, looking for global git installation"
+
+        $environment = Get-ChildItem Env:Path | Select-Object -First 1 -ExpandProperty "Value"
+        $gitPath = $environment.Split(';') | Where-Object {$_.Contains("Git")} | Select-Object -First 1;
+
+        if (Test-Path $gitPath)
+        {
+            Write-Host "Global git installation found at: $gitPath"
+            $folders = $gitPath
+        }
+        else
+        {
+            Write-Host "No global git installation found, looking for PortableGit inside GitHub installation"
+            # Find all 'PortableGit*' folders in the GitHub for Windows application folder
+            $gitHubPath = "C:\Users\$env:username\AppData\Local\GitHub"
+            $portaleGitFolders = Get-ChildItem $gitHubPath | ?{ $_.PSIsContainer } | ?{$_.Name -like 'PortableGit*'} | Join-Path -ChildPath "bin"
+
+            if (Test-Path $portableGitFolders)
+            {
+                $folders = $portableGitFolders
+            }
+            else 
+            {
+                Write-Host "No PortableGit found inside GitHub installation"
+            }
+        }
+    }	
+    else 
+    {
+        if (Test-Path (Join-Path $customGitPath "git.exe"))
+        {
+            $folders = @($customGitPath)
+        }
+    }
+
+    if ($folders.Length -eq 0)
+    {
+        Write-Host "No global Git in Path, no GitHub installation found or no custom path found"
+        Return
+    } 
 
 	# Provision the PoSH GitFlow scripts for each instance of PortableGit
-	foreach ($portableGitFolder in $portableGitFolders){
-		$gitPath = (Join-Path (Join-Path $gitHubPath $portableGitFolder.Name) "bin")
+	foreach ($gitPath in $folders){
 		Write-Host "Installing extensions to Git binaries in '$gitPath'" -ForegroundColor Green
 
 		Write-Host "Copying Required supporting binaries"
@@ -37,5 +77,6 @@ Function Configure-GitFlow
 	Write-Host "Press Any Key to finish"
 	Read-Host
 }
+
 
 Configure-GitFlow
