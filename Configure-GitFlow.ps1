@@ -74,7 +74,7 @@ Function Configure-GitFlow
 		Copy-Item (Join-Path $gitPath "libiconv-2.dll") -Destination (Join-Path $gitPath "libiconv2.dll") -Verbose
 	}
 
-	Write-Host "Press Any Key to finish"
+	Write-Host "Press Enter to finish"
 	Read-Host
 }
 
