@@ -17,22 +17,42 @@ Function Configure-GitFlow
 
 	# Find all 'PortableGit*' folders in the GitHub for Windows application folder
 	$gitHubPath = "C:\Users\$env:username\AppData\Local\GitHub"
-	$portableGitFolders = Get-ChildItem $gitHubPath | ?{ $_.PSIsContainer } | ?{$_.Name -like 'PortableGit*'}
+    if (Test-Path $gitHubPath) {
 
-	# Provision the PoSH GitFlow scripts for each instance of PortableGit
-	foreach ($portableGitFolder in $portableGitFolders){
-		$gitPath = (Join-Path (Join-Path $gitHubPath $portableGitFolder.Name) "bin")
-		Write-Host "Installing extensions to Git binaries in '$gitPath'" -ForegroundColor Green
+	    $portableGitFolders = Get-ChildItem $gitHubPath | ?{ $_.PSIsContainer } | ?{$_.Name -like 'PortableGit*'}
+
+	    # Provision the PoSH GitFlow scripts for each instance of PortableGit
+	    foreach ($portableGitFolder in $portableGitFolders){
+		    $gitPath = (Join-Path (Join-Path $gitHubPath $portableGitFolder.Name) "bin")
+		    Write-Host "Installing extensions to Git binaries in '$gitPath'" -ForegroundColor Green
+
+		    Write-Host "Copying Required supporting binaries"
+		    Copy-Item (Join-Path $currentPath "Dependencies\*.*") -Destination $gitPath -Verbose
+    	
+		    Write-Host "Copying GitFlow extensions"
+		    Copy-Item (Join-Path $currentPath "GitFlowExtensions\**") -Destination $gitPath -Verbose
+    	
+		    Write-Host "Copying Git components"
+		    Copy-Item (Join-Path $gitPath "libiconv-2.dll") -Destination (Join-Path $gitPath "libiconv2.dll") -Verbose
+	    }
+    }
+
+	$gitPath = "C:\Users\$env:username\AppData\Local\Programs\Git"
+    if (Test-Path $gitPath) {
+		$gitBinPath = (Join-Path $gitPath "bin")
+		$gitMingW64BinPath = (Join-Path (Join-Path $gitPath "mingw64") "bin")
+
+		Write-Host "Installing extensions to Git binaries in '$gitBinPath'" -ForegroundColor Green
 
 		Write-Host "Copying Required supporting binaries"
-		Copy-Item (Join-Path $currentPath "Dependencies\*.*") -Destination $gitPath -Verbose
+		Copy-Item (Join-Path $currentPath "Dependencies\*.*") -Destination $gitBinPath -Verbose
     	
 		Write-Host "Copying GitFlow extensions"
-		Copy-Item (Join-Path $currentPath "GitFlowExtensions\**") -Destination $gitPath -Verbose
+		Copy-Item (Join-Path $currentPath "GitFlowExtensions\**") -Destination $gitBinPath -Verbose
     	
 		Write-Host "Copying Git components"
-		Copy-Item (Join-Path $gitPath "libiconv-2.dll") -Destination (Join-Path $gitPath "libiconv2.dll") -Verbose
-	}
+		Copy-Item (Join-Path $gitMingW64BinPath "libiconv-2.dll") -Destination (Join-Path $gitBinPath "libiconv2.dll") -Verbose
+    }
 
 	Write-Host "Press Enter to finish"
 	Read-Host
