@@ -33,7 +33,7 @@ Function Configure-GitFlow
 		    Copy-Item (Join-Path $currentPath "GitFlowExtensions\**") -Destination $gitPath -Verbose
     	
 		    Write-Host "Copying Git components"
-		    Copy-Item (Join-Path $gitPath "libiconv-2.dll") -Destination (Join-Path $gitPath "libiconv2.dll") -Verbose
+		    Copy-Item (Join-Path (Join-Path (Join-Path (Join-Path $gitHubPath $portableGitFolder.Name) "mingw32") "bin") "libiconv-2.dll") -Destination (Join-Path (Join-Path (Join-Path (Join-Path $gitHubPath $portableGitFolder.Name) "mingw32") "bin") "libiconv2.dll") -Verbose
 	    }
     }
 
